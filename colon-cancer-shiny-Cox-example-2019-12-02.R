@@ -23,18 +23,11 @@ RFS.fit=coxph(RFS~as.factor(rx)+as.factor(sex)+age+as.factor(obstruct)+nodes,
 
 
 # source the shine.coxph function defition
-source('D:/SPounds/Teaching/shinyCoxApp/shiny-Cox-2019-12-02.R')
+source('https://raw.githubusercontent.com/stan-pounds/shinyCox/master/shiny-Cox-2019-12-02.R')
 
 
 # Specify the location of the directory in which to create the app on your machine.
-app.dir="D:/SPounds/Teaching/shinyCoxApp/"
+app.dir=getwd()
 
 # create and launch a shiny R app to visualize the coxph result in RFS.fit
 test.res=shine.coxph(RFS.fit,app.dir,launch.app=T)
-
-# 
-OS.fit=coxph(OS~as.factor(rx)+as.factor(sex)+age+
-                as.factor(obstruct)+as.factor(perfor)+as.factor(node4)+as.factor(surg),
-             data=colon.OS,x=T)
-
-test.res=shine.coxph(OS.fit,app.dir,launch.app=T)
