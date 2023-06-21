@@ -57,6 +57,7 @@ simplify.coxph=function(coxph.result)
                p.value=cox.smry[,"Pr(>|z|)"])
   pha.tbl=cox.pha
   nevents=coxph.result$nevent # added
+  nsample=coxph.result$n
   
   
   ########
@@ -69,12 +70,12 @@ simplify.coxph=function(coxph.result)
   
   # Attempt to fix transform names
   ##############################################################
-  # coefs <- coxph.result$coefficients
-  # pattern <- "^[a-zA-Z0-9\\_\\.]+$"
-  # badnames <- which(!grepl(pattern, names(coefs)))
-  # newcoefnames <- paste0("`", names(coefs)[badnames], "`")
-  # attr(coefs, "names")[badnames] = newcoefnames
-  # cox.coefs=coefs
+  coefs <- coxph.result$coefficients
+  pattern <- "^[a-zA-Z0-9\\_\\.\\*\\:]+$"
+  badnames <- which(!grepl(pattern, names(coefs)))
+  newcoefnames <- paste0("`", names(coefs)[badnames], "`")
+  attr(coefs, "names")[badnames] = newcoefnames
+  cox.coefs=coefs
   ##############################################################
   
   #cox.assign=coxph.result$assign
@@ -97,7 +98,8 @@ simplify.coxph=function(coxph.result)
            form=form,          # model formula
            HR.table=HR.tbl,    # hazard ratio estimates
            PHA.table=pha.tbl,  # tests of proportional hazards assumption
-           nevents=nevents)    # number of events
+           nevents=nevents,    # number of events
+           nsample=nsample)    # number of samples
   
   return(res)                  # returns list object with all the above information
 }
@@ -195,27 +197,20 @@ check.coxfit=function(cox.fit,coxph.result,tol=1e-7)
     } else
     new.data=as.data.frame(cox.input[i,-1])
     # Grabs original dataset to add extra untransformed columns
-    # Does not work if rm(dset), or if data argument is not in a prespecified location
+    # Does not work if rm(dset)
     ########################################################################
-    # vars <- all.vars(coxph.result$call)
-    # origdataname <- vars[length(vars)]
-    # origdatavar <- str2lang(origdataname)
-    # origdata <- eval(origdatavar)
-    # notvars <- setdiff(names(origdata), vars)
-    # origdata <- origdata[,!names(origdata) %in% notvars]
-    # stringform <- Reduce(paste, deparse(coxph.result$formula))
-    # output <- strsplit(stringform, " ~ ")[[1]][1]
-    # origdata <- origdata[, !names(origdata) %in% output]
-    # unused <- setdiff(names(origdata), names(new.data))
-    # new.data <- cbind.data.frame(new.data, origdata[i, unused, drop = FALSE])
+    vars <- all.vars(coxph.result$call)
+    dataOrig <- eval(coxph.result$call$data)
+    notvars <- setdiff(names(dataOrig), vars)
+    dataOrig <- dataOrig[,!names(dataOrig) %in% notvars]
+    stringform <- Reduce(paste, deparse(coxph.result$formula))
+    output <- strsplit(stringform, " ~ ")[[1]][1]
+    dataOrig <- dataOrig[, !names(dataOrig) %in% output]
+    unused <- setdiff(names(dataOrig), names(new.data))
+    new.data <- cbind.data.frame(new.data, dataOrig[i, unused, drop = FALSE])
     ########################################################################
     cox.pred1=predict.one.coxfit(cox.fit,new.data)                 # prediction with new object
     cox.pred2=one.survfit(coxph.result,newdata=new.data)           # prediction by survival package
-    # Changes coefficient name of translation
-    # pattern <- "^[a-zA-Z0-9\\_\\.]+$"
-    # badnames <- which(!grepl(pattern, names(new.data)))
-    # newcoefnames <- paste0("`", names(new.data)[badnames], "`")
-    # attr(new.data, "names")[badnames] = newcoefnames   
     pred.diff=abs(cox.pred1[,"surv"]-cox.pred2$surv)               # absolute value of difference
     ok=(max(pred.diff)<tol)                                        # check if within numerical error
     if (!ok)                                                       # stop if error detected
