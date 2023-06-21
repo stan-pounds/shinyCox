@@ -89,19 +89,19 @@ dset4=cbind.data.frame(grp=grp4,x=x4,
 ##########################################
 # Fit a cox model to the example data set
 
-cox.fit1=coxph(srv~sex+log(u)+v+grp+strata(strt),
+cox.fit1=coxph(srv~sex+u+v+grp+strata(strt),
                data=dset1,
                x=TRUE,model=TRUE)
 
-cox.fit2=coxph(srv~sex+log(u)+v+grp+strata(strt),
+cox.fit2=coxph(srv~sex+u+v+grp+strata(strt),
                data=dset2,
                x=TRUE,model=TRUE)
 
-cox.fit3=coxph(srv~sex+log(u)+v+grp+strata(strt),
+cox.fit3=coxph(srv~sex+u+v+grp+strata(strt),
                data=dset3,
                x=TRUE,model=TRUE)
 
-cox.fit4=coxph(srv~sex+log(u)+v+grp+strata(strt),
+cox.fit4=coxph(srv~sex+u+v+grp+strata(strt),
                data=dset4,
                x=TRUE,model=TRUE)
 ########################################
@@ -115,9 +115,9 @@ cox.fit4=coxph(srv~sex+log(u)+v+grp+strata(strt),
 ########################################
 # Generate an app for the example data set model
 
-source("~/Project/ShinyCox/cox-predictions.R")
-source("~/Project/ShinyCox/shiny-blocks.R")
-source("~/Project/ShinyCox/shiny-builder.R")
+source("~/Projects/shinyCox/cox-predictions.R")
+source("~/Projects/shinyCox/shiny-blocks.R")
+source("~/Projects/shinyCox/shiny-builder.R")
 app.dir="~/Project/ShinyCox/TestApps/"
 
 test.res=shine.coxph(fit1 = cox.fit1,fit2 = cox.fit2,
@@ -174,22 +174,6 @@ test.res=shine.coxph(fit1 = cox.fit1,fit2 = cox.fit2,
 # test.real <- shine.coxph(HDADE = arm1.fit,CloArac = arm2.fit,
 #                          app.dir = app.dir)
 # 
-
-##############################################
-# Now try for the AML02 data set
-
-
-# aml08.arm1 <- read.csv("arm1.csv")
-# 
-# NEED TO EDIT
-# 
-# 
-# aml02.cox.efs=coxph(EFS~WBC+AGE+initialRisk,data=aml02.data,
-#                     x=T,model=T)
-# aml02.shiny=shine.coxph(aml02.cox.efs,
-#                         app.dir=app.dir,
-#                         launch.app=T)
-
 
 
 ######################################################
