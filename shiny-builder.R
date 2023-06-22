@@ -82,6 +82,7 @@ shine.coxph=function(...)
             "actionButton(inputId = 'go', label = 'Generate Plot'),",
             "actionButton(inputId = 'reset', label = 'Reset'),", # SUBODH ADDITION
             "actionButton(inputId = 'app.exit', label = 'Exit App'),",
+            "selectInput('clrs', label = 'Choose Colors', choices = hcl.pals())", # color choice
             "),",
             "mainPanel(",
             "h3('Predicted Survival Curve'),",
@@ -113,6 +114,7 @@ shine.coxph=function(...)
                 "output$cox.times=renderTable(predProbTable,rownames=TRUE)", # SUBODH ADDITION
                 "output$HR=renderTable(cox.fit.list[[1]]$HR.table,rownames=TRUE)", # SUBODH ADDITION
                 "output$PHA=renderTable(cox.fit.list[[1]]$PHA.table$table,rownames=TRUE)", # SUBODH ADDITION
+                "colors=hcl.colors(length(cox.fit.list), input$clrs, alpha = 1)", # colors
                 "})",
                 "          observeEvent(input$reset, {output$KM <- output$HR <- output$PHA <- output$cox.times <- NULL}) # Reset main area", # SUBODH ADDITION
                 "}") # SUBODH CHANGED THE FLOW
@@ -182,7 +184,7 @@ write.KM.plot.code=function(cox.fit.list,clrs)
   #########
   # server and ui code to display KM plots
   
-  display.KM.server=c("output$KM=renderPlot({cox.KM.plots(KM.hat,clrs=clrs)})")
+  display.KM.server=c("output$KM=renderPlot({cox.KM.plots(KM.hat,clrs=colors)})")
   display.KM.ui=c("plotOutput(outputId = 'KM')")
   
   ui.code=c(ui.code,
@@ -369,11 +371,11 @@ get.vnames.cox.fits=function(cox.fit.list)
   dup.name=duplicated(var.name)
   var.name=var.name[!dup.name]
   var.type=var.type[!dup.name]
-  # ADDITION
-  # for (i in 1:length(var.type)) {
-  #   var.type[i] <- gsub("logical", "numeric", var.type[i]) #NEW changes logical to numeric
-  # }
-  
+  # Find better place for this, covers issue with interactions
+  #############################
+  var.name=na.omit(var.name)
+  var.type=na.omit(var.type)
+  ###############################
   res=cbind.data.frame(var.name=var.name,
                        var.type=var.type)
   
@@ -385,7 +387,7 @@ get.vnames.cox.fits=function(cox.fit.list)
 
 get.levels.cox.fits=function(cox.fit.list,vnames)
 {
-  # how to deal with logical
+  
   cat.vars=which(vnames[,"var.type"]!="numeric" & vnames[,"var.type"]!="logical") 
   if (length(cat.vars)==0)
     return(NULL)
@@ -439,8 +441,6 @@ get.xrng.cox.fits=function(cox.fit.list,vnames)
   
   for (i in 1:n.models)
   {
-    # ADDITION by harry
-    #colnames(cox.fit.list[[i]]$num.x.rng) <- gsub("TRUE", "", colnames(cox.fit.list[[i]]$num.x.rng))
     x.rng=cox.fit.list[[i]]$num.x.rng
     for (j in 1:ncol(rng.mtx))
     {
@@ -462,7 +462,7 @@ get.logic.cox.fits <- function(cox.fit.list, vnames) {
     return(NULL)
 
   n.vars <- length(logic.vars)
-  n.models <- length(cox.fit.list)
+ 
   logic.levels <- vector("list", n.vars)
   logic.names <- vnames[logic.vars, "var.name"]
   names(logic.levels) <- logic.names
@@ -483,22 +483,22 @@ prop.haz.tables <- function(cox.fit.list) {
     
     server.code = c(server.code,paste0("output$HR", i, "=renderTable(cox.fit.list[[",i, "]]$HR.table,rownames=TRUE)"),
                     paste0("output$PHA", i, "=renderTable(cox.fit.list[[",i, "]]$PHA.table$table,rownames=TRUE)"),
-                    paste0("output$nevents", i, "=renderText(paste('Number of events: ',cox.fit.list[[",i, "]]$nevents))"))
+                    paste0("output$title", i, "=renderText(paste(cox.fit.list[[",i,"]]$nsample, 'samples,', cox.fit.list[[",i, "]]$nevents, 'events'))"))
     
     if(i < length(cox.fit.list)){
     ui.code = c(ui.code,paste0("tabPanel('",names(cox.fit.list)[i],"',"),
+                paste0("h5(textOutput(outputId = 'title", i, "')),"),
                 "'Hazard Ratio Summary Table',",
                 paste0("column(12, align = 'center', tableOutput(outputId = 'HR", i, "')),"),
                 "h4('Assesing the Proportional Hazards Assumption'),",
                 paste0("column(12, align = 'center', tableOutput(outputId = 'PHA", i, "')),"),
-                paste0("textOutput(outputId = 'nevents", i, "')"),
                 "),") } else
                   ui.code = c(ui.code,paste0("tabPanel('",names(cox.fit.list)[i],"',"),
+                              paste0("h5(textOutput(outputId = 'title", i, "')),"),
                               "'Hazard Ratio Summary Table',",
                               paste0("column(12, align = 'center', tableOutput(outputId = 'HR", i, "')),"),
                               "h4('Assesing the Proportional Hazards Assumption'),",
                               paste0("column(12, align = 'center', tableOutput(outputId = 'PHA", i, "')),"),
-                              paste0("textOutput(outputId = 'nevents", i, "')"),
                               ")")
   }
   ui.code=c(ui.code, ")")
