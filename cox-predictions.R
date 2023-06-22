@@ -66,7 +66,7 @@ simplify.coxph=function(coxph.result)
   cox.terms=attr(coxph.result$terms,"term.labels")
   cox.types=attr(coxph.result$terms,"dataClasses")
   cox.types=cox.types[cox.terms]
-  cox.coefs=coef(coxph.result)
+  #cox.coefs=coef(coxph.result)
   
   # Attempt to fix transform names
   ##############################################################
@@ -154,25 +154,27 @@ compute.coxfit.xvector=function(coxfit,
 {
   # create right-hand side of formula
   #form=deparse(coxfit$form)
-  form <- Reduce(paste, deparse(coxfit$form))
-  tilde.pos=regexpr("~",form,fixed=T)
-  form=substring(form,tilde.pos)
-
-  # use model matrix to create x vector
-  form=as.formula(form)
+  # form <- Reduce(paste, deparse(coxfit$form))
+  # tilde.pos=regexpr("~",form,fixed=T)
+  # form=substring(form,tilde.pos)
+  # 
+  # # use model matrix to create x vector
+  # form=as.formula(form)
   # Attempt to fix transformation names
   #####################################################################
-  # testform <- Reduce(paste, deparse(cox.fit1$formula))
-  # backtickedform <- gsub(" ","\`", testform)
-  # splitform <- strsplit(backtickedform, "~")[[1]][2]
-  # formfixedstrata <- gsub("\`strata", "strata", splitform)
-  # readyform <- paste0("~", formfixedstrata)
-  # formcall <- str2lang(readyform)
-  # formasform <- as.formula(formcall, env = parent.frame())
-  # mtx <- model.matrix(formasform, data=newdata, xlev = coxfit$xlevels)
+  testform <- Reduce(paste, deparse(coxfit$form))
+  backtickedform <- gsub(" ","\`", testform)
+  backtickedform <- gsub("(\\`)(\\w)(\\:)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
+  backtickedform <- gsub("(\\`)(\\w)(\\^)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
+  splitform <- strsplit(backtickedform, "~")[[1]][2]
+  formfixedstrata <- gsub("\`strata", "strata", splitform)
+  readyform <- paste0("~", formfixedstrata)
+  formcall <- str2lang(readyform)
+  formasform <- as.formula(formcall, env = parent.frame())
+  mtx <- model.matrix(formasform, data=newdata, xlev = coxfit$xlevels)
   #######################################################
   
-  mtx=model.matrix(form,data=newdata,xlev=coxfit$xlevels)
+  #mtx=model.matrix(form,data=newdata,xlev=coxfit$xlevels)
   if(length(mtx[1,]) == 1) {
   x=mtx[1,names(coxfit$coefs), drop = FALSE]
   } else x=mtx[1,names(coxfit$coefs)]
