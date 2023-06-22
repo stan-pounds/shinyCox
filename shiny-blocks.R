@@ -20,7 +20,7 @@ ez.pickone=function(vname,    # Variable name
                  # paste0(choices,
                           # paste0("'",choices,"'"), # this causes quotes around everything
                  #   collapse=", "),"))") # SUBODH CHANGED FLOW
-  server.code=paste0(vname," = input$",vname)
+  server.code=paste0("`",vname,"` = input$`",vname,"`")
   return(list(ui.code=ui.code,
               server.code=server.code))
 }
@@ -41,7 +41,7 @@ ez.slider=function(vname,  # variable name
                  ", min = ",min,
                  ", max = ",max,
                  ", value = ",value,")")
-  server.code=paste0(vname," = input$",vname)
+  server.code=paste0("`",vname,"` = input$`",vname,"`")
   return(list(ui.code=ui.code,
               server.code=server.code))
 }
@@ -117,13 +117,8 @@ ez.pickone.logic=function(vname,    # Variable name
                  ", choices = ", 
                  paste0(choices,
                         collapse=", "),
-                 ")") # SUBODH CHANGED FLOW AND REMOVED THE BELOW:
-  
-  # ", choices = c(",  # this adds an extra c() 
-  # paste0(choices,
-  # paste0("'",choices,"'"), # this causes quotes around everything
-  #   collapse=", "),"))") # SUBODH CHANGED FLOW
-  server.code=paste0(vname," = as.logical(input$",vname, ")")
+                 ")") 
+  server.code=paste0("`",vname,"` = as.logical(input$`",vname, "`)")
   return(list(ui.code=ui.code,
               server.code=server.code))
 }
