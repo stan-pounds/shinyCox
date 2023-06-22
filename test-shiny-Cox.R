@@ -129,51 +129,6 @@ test.res=shine.coxph(fit1 = cox.fit1,fit2 = cox.fit2,
 
 # REAL DATA EXAMPLE
 ##################################################################################
-# library(magrittr)
-# setwd("C:/Users/hclement/Documents/Project/ShinyCox")
-# datset <- readxl::read_xlsx("AML08-IDs-clinical-2021-06-06-for-JL.xlsx")
-# 
-# dataset <- subset(datset, datset$randarm != 9)
-# df2 <- split(dataset, dataset$randarm)
-# arm1 <- df2$`1`
-# arm2 <- df2$`2`
-# 
-# # predictors age, leukocyte count at diagnosis, MRD, FLT3-ITD, CBF leukemia,
-# # KMT2A fusions, presence of the M0, M6, or M7 FAB types
-# 
-# srv1 <- Surv(arm1$efstime, arm1$efscensor)
-# srv2 <- Surv(arm2$efstime, arm2$efscensor)
-# 
-# arm1[arm1 == "N/A"] <- NA
-# arm2[arm2 == "N/A"] <- NA
-# 
-# arm1 <- arm1 %>%
-#   dplyr::mutate(M0.M6.M7 = (FAB == "M0" | FAB == "M6" | FAB == "M7"),
-#          KMT2A = (grepl("11q23", arm1$PRIMARYDIAGNOSIS)),
-#          Age.over.10 = (ONSTUDYDATE/365.25 >= 10),
-#          MRDpos = (mrdgrp1 == 2),
-#          FLT3ITD = (FLT3 == "ITD"),
-#          WBCover50 = (WBC >= 50))
-# arm2 <- arm2 %>%
-#   dplyr::mutate(M0.M6.M7 = (FAB == "M0" | FAB == "M6" | FAB == "M7"),
-#                 KMT2A = (grepl("11q23", arm2$PRIMARYDIAGNOSIS)),
-#                 Age.over.10 = (ONSTUDYDATE/365.25 >= 10),
-#                 MRDpos = (mrdgrp1 == 2),
-#                 FLT3ITD = (FLT3 == "ITD"),
-#                 WBCover50 = (WBC >= 50))
-# 
-# arm1.fit <- coxph(srv1 ~ WBCover50 + M0.M6.M7 + CBF +
-#                     KMT2A + Age.over.10 + MRDpos, arm1, x = TRUE, model = TRUE)
-# 
-# arm2.fit <- coxph(srv2 ~ WBCover50 + M0.M6.M7 + CBF +
-#                     KMT2A + Age.over.10 + MRDpos, arm2, x = TRUE, model = TRUE)
-# #
-# # rm(arm1)
-# # rm(arm2)
-# 
-# test.real <- shine.coxph(HDADE = arm1.fit,CloArac = arm2.fit,
-#                          app.dir = app.dir)
-# 
 
 
 ######################################################
