@@ -71,7 +71,7 @@ simplify.coxph=function(coxph.result)
   # Attempt to fix transform names
   ##############################################################
   coefs <- coxph.result$coefficients
-  pattern <- "^[a-zA-Z0-9\\_\\.\\*\\:]+$"
+  pattern <- "^[a-zA-Z0-9\\_\\.\\*\\:\\-\\s\\>]+"
   badnames <- which(!grepl(pattern, names(coefs)))
   newcoefnames <- paste0("`", names(coefs)[badnames], "`")
   attr(coefs, "names")[badnames] = newcoefnames
@@ -162,12 +162,13 @@ compute.coxfit.xvector=function(coxfit,
   # form=as.formula(form)
   # Attempt to fix transformation names
   #####################################################################
-  testform <- Reduce(paste, deparse(coxfit$form))
-  backtickedform <- gsub(" ","\`", testform)
+  testform <- gsub("\\s+"," ",testform)
+  backtickedform <- gsub(" ","\\`", testform)
+  backtickedform <- gsub("$", "\\`", backtickedform)
   backtickedform <- gsub("(\\`)(\\w)(\\:)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
   backtickedform <- gsub("(\\`)(\\w)(\\^)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
   splitform <- strsplit(backtickedform, "~")[[1]][2]
-  formfixedstrata <- gsub("\`strata", "strata", splitform)
+  #formfixedstrata <- gsub("\\`strata", "strata", splitform) # this will not work anymore, no strata for now
   readyform <- paste0("~", formfixedstrata)
   formcall <- str2lang(readyform)
   formasform <- as.formula(formcall, env = parent.frame())
@@ -203,11 +204,21 @@ check.coxfit=function(cox.fit,coxph.result,tol=1e-7)
     ########################################################################
     vars <- all.vars(coxph.result$call)
     dataOrig <- eval(coxph.result$call$data)
+    dataOrig <- as.data.frame(dataOrig)
     notvars <- setdiff(names(dataOrig), vars)
     dataOrig <- dataOrig[,!names(dataOrig) %in% notvars]
     stringform <- Reduce(paste, deparse(coxph.result$formula))
     output <- strsplit(stringform, " ~ ")[[1]][1]
-    dataOrig <- dataOrig[, !names(dataOrig) %in% output]
+    lhsadj1 <- strsplit(output, "Surv\\(")[[1]][2]                           # solves issue with Surv(tm, status) ~, need to check for start, stop
+    lhsadj2 <- strsplit(lhsadj1, "\\,")[[1]]
+    lhsadj3 <- gsub(".*\\((.*)\\).*", "\\1", lhsadj2)
+    lhsadj4 <- gsub("\\)", "", lhsadj3)
+    lhsadj5 <- strsplit(lhsadj4, "\\$")
+    lhsadj6 <- c()
+    for (i in 1:length(lhsadj5)) {
+      lhsadj6 <- c(lhsadj6, lhsadj5[[i]][2])
+    }
+    dataOrig <- dataOrig[, !names(dataOrig) %in% lhsadj6]
     unused <- setdiff(names(dataOrig), names(new.data))
     new.data <- cbind.data.frame(new.data, dataOrig[i, unused, drop = FALSE])
     ########################################################################
