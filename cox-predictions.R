@@ -168,8 +168,8 @@ compute.coxfit.xvector=function(coxfit,
   backtickedform <- gsub("(\\`)(\\w)(\\:)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
   backtickedform <- gsub("(\\`)(\\w)(\\^)(\\w)(\\`)", "\\2\\3\\4", backtickedform)
   splitform <- strsplit(backtickedform, "~")[[1]][2]
-  #formfixedstrata <- gsub("\\`strata", "strata", splitform) # this will not work anymore, no strata for now
-  readyform <- paste0("~", formfixedstrata)
+  fixedstrata <- gsub("\\`(strata\\(.*\\))\\`", "\\1", splitform)
+  readyform <- paste0("~", fixedstrata)
   formcall <- str2lang(readyform)
   formasform <- as.formula(formcall, env = parent.frame())
   mtx <- model.matrix(formasform, data=newdata, xlev = coxfit$xlevels)
