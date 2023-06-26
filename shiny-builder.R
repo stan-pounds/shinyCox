@@ -82,7 +82,7 @@ shine.coxph=function(...)
             "actionButton(inputId = 'go', label = 'Generate Plot'),",
             "actionButton(inputId = 'reset', label = 'Reset'),", # SUBODH ADDITION
             "actionButton(inputId = 'app.exit', label = 'Exit App'),",
-            "selectInput('clrs', label = 'Choose Colors', choices = hcl.pals())", # color choice
+            "selectInput('clrs', label = 'Choose Colors', choices = palette.pals())", # color choice
             "),",
             "mainPanel(",
             "h3('Predicted Survival Curve'),",
@@ -114,7 +114,7 @@ shine.coxph=function(...)
                 "output$cox.times=renderTable(predProbTable,rownames=TRUE)", # SUBODH ADDITION
                 "output$HR=renderTable(cox.fit.list[[1]]$HR.table,rownames=TRUE)", # SUBODH ADDITION
                 "output$PHA=renderTable(cox.fit.list[[1]]$PHA.table$table,rownames=TRUE)", # SUBODH ADDITION
-                "colors=hcl.colors(length(cox.fit.list), input$clrs, alpha = 1)", # colors
+                "colors = palette.colors(length(cox.fit.list), input$clrs)", # colors
                 "})",
                 "          observeEvent(input$reset, {output$KM <- output$HR <- output$PHA <- output$cox.times <- NULL}) # Reset main area", # SUBODH ADDITION
                 "}") # SUBODH CHANGED THE FLOW

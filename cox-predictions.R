@@ -209,16 +209,27 @@ check.coxfit=function(cox.fit,coxph.result,tol=1e-7)
     dataOrig <- dataOrig[,!names(dataOrig) %in% notvars]
     stringform <- Reduce(paste, deparse(coxph.result$formula))
     output <- strsplit(stringform, " ~ ")[[1]][1]
-    lhsadj1 <- strsplit(output, "Surv\\(")[[1]][2]                           # solves issue with Surv(tm, status) ~, need to check for start, stop
-    lhsadj2 <- strsplit(lhsadj1, "\\,")[[1]]
-    lhsadj3 <- gsub(".*\\((.*)\\).*", "\\1", lhsadj2)
-    lhsadj4 <- gsub("\\)", "", lhsadj3)
-    lhsadj5 <- strsplit(lhsadj4, "\\$")
-    lhsadj6 <- c()
-    for (i in 1:length(lhsadj5)) {
-      lhsadj6 <- c(lhsadj6, lhsadj5[[i]][2])
-    }
-    dataOrig <- dataOrig[, !names(dataOrig) %in% lhsadj6]
+    isSurv <- grepl("Surv\\(", output)
+    if(isSurv) {
+      lhsadj1 <- strsplit(output, "Surv\\(")[[1]][2]
+      lhsadj2 <- strsplit(lhsadj1, "\\,")[[1]]
+      lhsadj3 <- gsub(".*\\((.*)\\).*", "\\1", lhsadj2)
+      lhsadj4 <- gsub("\\)", "", lhsadj3)
+      lhsadj5 <- strsplit(lhsadj4, "\\$")
+      lhsadj6 <- c()
+      for (i in 1:length(lhsadj5)) {
+        if(is.na(lhsadj5[[i]][2])) {
+          lhsadj6 <- c(lhsadj6, lhsadj5[[i]][1])
+        } else {
+          lhsadj6 <- c(lhsadj6, lhsadj5[[i]][2])
+        }
+        if(grepl("\\s", lhsadj6[i])) {
+          lhsadj6[i] <- gsub("\\s(\\w)", "\\1", lhsadj6[i])
+        }
+      }
+      dataOrig <- dataOrig[, !names(dataOrig) %in% lhsadj6]
+    } else
+    {dataOrig <- dataOrig[, !names(dataOrig) %in% output]}
     unused <- setdiff(names(dataOrig), names(new.data))
     new.data <- cbind.data.frame(new.data, dataOrig[i, unused, drop = FALSE])
     ########################################################################
