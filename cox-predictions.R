@@ -71,6 +71,9 @@ simplify.coxph=function(coxph.result)
   # Attempt to fix transform names
   ##############################################################
   coefs <- coxph.result$coefficients
+  if(any(is.na(coefs))) {
+    stop("One or more of your coefficients is NA")
+  }
   pattern <- "^[a-zA-Z0-9\\_\\.\\*\\:\\-\\s\\>]+"
   badnames <- which(!grepl(pattern, names(coefs)))
   newcoefnames <- paste0("`", names(coefs)[badnames], "`")
